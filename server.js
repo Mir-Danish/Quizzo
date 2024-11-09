@@ -167,7 +167,7 @@ app.post("/userdata", async (req, res) => {
             return res.status(404).send({ status: "error", message: "User not found" });
         }
 
-        console.log("User data fetched:", userData);
+        
         return res.send({ status: "ok", data: userData });
     } catch (error) {
         console.error("Token verification error:", error);
