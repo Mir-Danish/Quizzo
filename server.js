@@ -37,7 +37,11 @@ app.get("/hell",(req,res)=>{
 });
 
 
-
+app.get("/hell",(req,res) =>{
+    res.send({
+        status:"hello there"
+    })
+})
 
 
 
@@ -201,11 +205,7 @@ app.use("/api/v1/auth",require("./routes/userRoutes"));
 //PORT
 const PORT = process.env.PORT || 8040
 
-app.get("/hell",(req,res) =>{
-    res.send({
-        status:"hello there"
-    })
-})
+
 //LISTEN
 app.listen(PORT,()=>{
     console.log(`Server Runing on ${PORT}`.bgGreen.white);
