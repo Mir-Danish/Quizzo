@@ -32,14 +32,14 @@ require("./models/userDetails");
 
 const User=mongoose.model("UserInfo");
 
-app.get("/",(req,res)=>{
-    res.status(200).send({
-        "success":true,
-        "message":"Node Server Running"
-});
+// app.get("/",(req,res)=>{
+//     res.status(200).send({
+//         "success":true,
+//         "message":"Node Server Running"
+// });
 
 
-app.get("/hell",(req,res) =>{
+app.get("/",(req,res) =>{
     res.send({
         status:"hello there"
     })
