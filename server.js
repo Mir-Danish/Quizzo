@@ -9,14 +9,15 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 require("./models/userDetails");
 const Question = require("./models/questionDetail");
+const ContestScore = require("./models/contestScores");
 
-{/*const JWT_SECRET = "HSGpaYK@&GS98GS23SnS" */}
+
+
 //Dotenv
 dotenv.config();
 
 //MONGODB Connection
 connectDB();
-
 
 //Rest Object
 const app = express()
@@ -30,20 +31,12 @@ require("./models/userDetails");
 
 
 
-const User=mongoose.model("UserInfo");
+const User = mongoose.model("UserInfo");
 
-// app.get("/",(req,res)=>{
-//     res.status(200).send({
-//         "success":true,
-//         "message":"Node Server Running"
-// });
+app.get("/hell", (req, res) => {
+    res.send({ status: "Hello" })
+});
 
-
-app.get("/",(req,res) =>{
-    res.send({
-        status:"hello there"
-    })
-})
 
 
 
@@ -64,30 +57,30 @@ app.get("/questions/:category", async (req, res) => {
 
 
 //REGISTER API
-app.post("/register",async(req,res)=>{
-    const {name,email,mobile,password} = req.body;
-    if(!password || password.length < 6) {
+app.post("/register", async (req, res) => {
+    const { name, email, mobile, password } = req.body;
+    if (!password || password.length < 6) {
         return res.send({
-            success:false,
-            data:"password is required and 6 character long"
+            success: false,
+            data: "password is required and 6 character long"
         })
     }
-    const oldUser = await User.findOne({email:email});
+    const oldUser = await User.findOne({ email: email });
 
-    if(oldUser){
-        return res.send({ data:"User Already Exists"});  
+    if (oldUser) {
+        return res.send({ data: "User Already Exists" });
     }
-    const encryptedPassword = await bcrypt.hash(password,10)
+    const encryptedPassword = await bcrypt.hash(password, 10)
     try {
         await User.create({
-        name:name,
-        email:email,
-        mobile,
-        password:encryptedPassword
+            name: name,
+            email: email,
+            mobile,
+            password: encryptedPassword
         });
-        res.send({status:"ok",data:"User Created"})
+        res.send({ status: "ok", data: "User Created" })
     } catch (error) {
-        res.send({status:"ok",data: "Erro in Registration"})
+        res.send({ status: "ok", data: "Erro in Registration" })
     }
 })
 
@@ -167,15 +160,13 @@ app.post("/userdata", async (req, res) => {
             return res.status(404).send({ status: "error", message: "User not found" });
         }
 
-        
+        //console.log("User data fetched:", userData);
         return res.send({ status: "ok", data: userData });
     } catch (error) {
         console.error("Token verification error:", error);
         return res.status(401).send({ status: "error", message: "Invalid token" }); // More specific error message
     }
 });
-
-
 
 
 
@@ -196,10 +187,104 @@ app.get("/questions/:category", async (req, res) => {
 
 
 
+// Endpoint to save user contest scores
+app.post("/save-scores", async (req, res) => {
+    const { userId, contestId, score, category, totalQuestions, username } = req.body;
+    
+    try {
+        // Convert userId to ObjectId if it's not already
+        const userObjectId = new mongoose.Types.ObjectId(userId);
+        const contestScore = new ContestScore({
+            userId: userObjectId,
+            contestId,
+            score,
+            category,
+            totalQuestions,
+            username
+        });
 
-app.listen(8040, ()=>{
-    console.log("Node js server is Started")
-})
+        const savedScore = await contestScore.save();
+
+        return res.send({ status: "ok", message: "Scores saved successfully" });
+    } catch (error) {
+        console.error("Error saving scores:", error.message);
+        return res.status(500).send({
+            status: "error",
+            message: "Internal server error",
+            error: error.message
+        });
+    }
+});
+
+// Endpoint to fetch user contest scores
+app.get("/scores/:userId", async (req, res) => {
+    const { userId } = req.params; // Get userId from request parameters
+    try {
+        const scores = await ContestScore.find({ userId }); // Find scores by userId
+        if (scores.length === 0) {
+            return res.status(404).send({ status: "error", message: "No scores found for this user" });
+        }
+        return res.send({ status: "ok", data: scores }); // Return the contest scores
+    } catch (error) {
+        console.error("Error fetching scores:", error);
+        return res.status(500).send({ status: "error", message: "Internal server error" });
+    }
+});
+
+// Endpoint to fetch user contest scores
+app.get("/contestscores/:userId", async (req, res) => {
+    const { userId } = req.params;
+
+    // Validate userId format
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return res.status(400).send({
+            status: "error",
+            message: "Invalid user ID format"
+        });
+    }
+
+    try {
+        // Convert userId to ObjectId
+        const userObjectId = new mongoose.Types.ObjectId(userId);
+       
+        const scores = await ContestScore.find({ userId: userObjectId });
+
+        if (scores.length === 0) {
+            return res.status(404).send({ status: "error", message: "No scores found for this user" });
+        }
+        return res.send({ status: "ok", data: scores });
+    } catch (error) {
+
+//this line is for development mode
+        if (process.env.NODE_ENV === 'development') {
+            console.error("Error fetching contest scores:", error);
+        }
+
+
+        return res.status(500).send({ status: "error", message: "Internal server error" });
+    }
+});
+
+// Endpoint to fetch all contest scores (global leaderboard)
+app.get("/allscores", async (req, res) => {
+    try {
+        const { category } = req.query;
+        const scores = await ContestScore.find({ category: category });
+        // console.log("Fetched all scores:", scores); // Removed console log
+        res.json(scores);
+    } catch (error) {
+        console.error("Error fetching scores:", error);
+        res.status(500).json({ error: "Failed to fetch scores" });
+    }
+});
+
+app.listen(8040, () => {
+    console.log("Node js server is Started");
+});
+
+
+
+
 
 {/*//ROUTES
 app.use("/api/v1/auth",require("./routes/userRoutes"));
@@ -207,7 +292,11 @@ app.use("/api/v1/auth",require("./routes/userRoutes"));
 //PORT
 const PORT = process.env.PORT || 8040
 
-
+app.get("/hell",(req,res) =>{
+    res.send({
+        status:"hello there"
+    })
+})
 //LISTEN
 app.listen(PORT,()=>{
     console.log(`Server Runing on ${PORT}`.bgGreen.white);
