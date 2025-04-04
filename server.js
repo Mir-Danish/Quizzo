@@ -249,8 +249,9 @@ app.get("/allscores", async (req, res) => {
         res.status(500).json({ error: "Failed to fetch scores" });
     }
 });
+const PORT = process.env.PORT || 5044
 
-app.listen(8040, () => {
+app.listen(PORT, () => {
     console.log("Node js server is Started");
 });
 
