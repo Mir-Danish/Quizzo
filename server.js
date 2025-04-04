@@ -9,7 +9,6 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 require("./models/userDetails");
 const Question = require("./models/questionDetail");
-const ContestScore = require("./models/contestScores");
 
 
 
@@ -231,39 +230,7 @@ app.get("/scores/:userId", async (req, res) => {
     }
 });
 
-// Endpoint to fetch user contest scores
-app.get("/contestscores/:userId", async (req, res) => {
-    const { userId } = req.params;
 
-    // Validate userId format
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-        return res.status(400).send({
-            status: "error",
-            message: "Invalid user ID format"
-        });
-    }
-
-    try {
-        // Convert userId to ObjectId
-        const userObjectId = new mongoose.Types.ObjectId(userId);
-       
-        const scores = await ContestScore.find({ userId: userObjectId });
-
-        if (scores.length === 0) {
-            return res.status(404).send({ status: "error", message: "No scores found for this user" });
-        }
-        return res.send({ status: "ok", data: scores });
-    } catch (error) {
-
-//this line is for development mode
-        if (process.env.NODE_ENV === 'development') {
-            console.error("Error fetching contest scores:", error);
-        }
-
-
-        return res.status(500).send({ status: "error", message: "Internal server error" });
-    }
-});
 
 // Endpoint to fetch all contest scores (global leaderboard)
 app.get("/allscores", async (req, res) => {
