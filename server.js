@@ -38,6 +38,10 @@ app.get("/hell", (req, res) => {
 });
 
 
+app.get("/", (req,res) => {
+    res.send({ status:"Hello welcome to server" })
+});
+
 
 
 // Fetch questions based on category
