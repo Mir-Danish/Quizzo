@@ -9,6 +9,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 require("./models/userDetails");
 const Question = require("./models/questionDetail");
+const ContestScore = require("./models/contestScores");
 
 
 
