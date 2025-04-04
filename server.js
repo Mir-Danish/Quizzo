@@ -29,7 +29,7 @@ app.use(morgan("dev"))
 
 require("./models/userDetails");
 
-
+const PORT = process.env.PORT || 5044
 
 const User = mongoose.model("UserInfo");
 
@@ -249,7 +249,7 @@ app.get("/allscores", async (req, res) => {
         res.status(500).json({ error: "Failed to fetch scores" });
     }
 });
-const PORT = process.env.PORT || 5044
+
 
 app.listen(PORT, () => {
     console.log("Node js server is Started");
@@ -262,8 +262,7 @@ app.listen(PORT, () => {
 {/*//ROUTES
 app.use("/api/v1/auth",require("./routes/userRoutes"));
 
-//PORT
-const PORT = process.env.PORT || 8040
+
 
 app.get("/hell",(req,res) =>{
     res.send({
